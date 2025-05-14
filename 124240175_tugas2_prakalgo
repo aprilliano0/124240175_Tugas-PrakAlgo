@@ -1,0 +1,226 @@
+#include <iostream>
+#include <string>
+#include <limits>
+using namespace std;
+
+class Buku {
+public:
+    string judul;
+    float harga;
+    Buku *sebelum;
+    Buku *setelah;
+
+    Buku(string j, float h) : 
+    judul(j), 
+    harga(h), 
+    sebelum(nullptr), 
+    setelah(nullptr) {}
+};
+
+class listbuku {
+private:
+    Buku *head;
+
+public:
+    listbuku() : head(nullptr) {}
+
+    void tambah(string judul, float harga)
+    {
+        Buku *baru = new Buku(judul, harga);
+        if (!head)
+        {
+            head = baru;
+        }
+        else
+        {
+            Buku *temp = head;
+            while (temp->setelah)
+                temp = temp->setelah;
+            temp->setelah = baru;
+            baru->sebelum = temp;
+        }
+    }
+
+    void tampilkan()
+    {
+        if (!head)
+        {
+            cout << "Belum ada data buku.\n";
+            return;
+        }
+        cout << "\n=== Daftar Buku ===\n";
+        Buku *temp = head;
+        while (temp)
+        {
+            cout << "Judul: " << temp->judul << ", Harga: Rp" << temp->harga << endl;
+            temp = temp->setelah;
+        }
+    }
+
+    void cari(string target)
+    {
+        Buku *temp = head;
+        while (temp)
+        {
+            if (temp->judul == target)
+            {
+                cout << "Buku ditemukan: " << temp->judul << ", Harga: Rp" << temp->harga << endl;
+                return;
+            }
+            temp = temp->setelah;
+        }
+        cout << "Buku dengan judul \"" << target << "\" tidak ditemukan.\n";
+    }
+
+    void sisip(string judul, float harga, string posisi)
+    {
+        Buku *baru = new Buku(judul, harga);
+
+        if (posisi == "depan")
+        {
+            if (head)
+            {
+                baru->setelah = head;
+                head->sebelum = baru;
+            }
+            head = baru;
+        }
+        else if (posisi == "belakang")
+        {
+            tambah(judul, harga);
+        }
+        else if (posisi == "tengah")
+        {
+            if (!head)
+            {
+                head = baru;
+                return;
+            }
+            Buku *slow = head;
+            Buku *fast = head;
+            while (fast && fast->setelah)
+            {
+                slow = slow->setelah;
+                fast = fast->setelah->setelah;
+            }
+            baru->setelah = slow->setelah;
+            baru->sebelum = slow;
+            if (slow->setelah)
+                slow->setelah->sebelum = baru;
+            slow->setelah = baru;
+        }
+        else
+        {
+            cout << "Posisi tidak valid.\n";
+            delete baru;
+        }
+    }
+
+    void hapus(string target)
+    {
+        Buku *temp = head;
+        while (temp)
+        {
+            if (temp->judul == target)
+            {
+                if (temp->sebelum)
+                    temp->sebelum->setelah = temp->setelah;
+                else
+                    head = temp->setelah;
+                if (temp->setelah)
+                    temp->setelah->sebelum = temp->sebelum;
+                delete temp;
+                cout << "Buku berhasil dihapus.\n";
+                return;
+            }
+            temp = temp->setelah;
+        }
+        cout << "Buku tidak ditemukan.\n";
+    }
+    ~listbuku()
+    {
+        Buku *temp = head;
+        while (temp)
+        {
+            Buku *hapus = temp;
+            temp = temp->setelah;
+            delete hapus;
+        }
+    }
+};
+
+void input(float &harga)
+{
+    while (!(cin >> harga) || harga < 0)
+    {
+        cout << "Input harga tidak valid : ";
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
+    cin.ignore(numeric_limits<streamsize>::max(), '\n'); 
+}
+
+int main()
+{
+    listbuku listdftr;
+    int menu;
+    string judul;
+    float harga;
+
+    do
+    {
+        cout << "\n=== Menu ===\n";
+        cout << "1. Tambahkan Buku\n";
+        cout << "2. Tampilkan Seluruh Data Buku\n";
+        cout << "3. Cari Data Buku (Sequential Search)\n";
+        cout << "4. Sisip Buku (Depan, Tengah, Belakang)\n";
+        cout << "5. Hapus Buku\n";
+        cout << "6. Keluar\n";
+        cout << "Pilih Menu : ";
+        cin >> menu;
+        cin.ignore();
+
+        switch (menu)
+        {
+        case 1:
+            cout << "Judul Buku : ";
+            getline(cin, judul);
+            cout << "Harga Buku : ";
+            (harga);
+            listdftr.tambah(judul, harga);
+            break;
+        case 2:
+            listdftr.tampilkan();
+            break;
+        case 3:
+            cout << "Buku yang dicari : ";
+            getline(cin, judul);
+            listdftr.cari(judul);
+            break;
+        case 4:
+        {
+            string posisi;
+            cout << "Judul Buku : ";
+            getline(cin, judul);
+            cout << "Harga Buku : ";
+            (harga);
+            cout << "Posisi (depan / tengah / belakang): ";
+            getline(cin, posisi);
+            listdftr.sisip(judul, harga, posisi);
+            break;
+        }
+        case 5:
+            cout << "Judul buku yang dihapus : ";
+            getline(cin, judul);
+            listdftr.hapus(judul);
+            break;
+        case 6:
+            cout << "Program Berhasil!\n";
+            break;
+        default:
+            cout << "Pilihan tidak valid silahkan coba lagi.\n";
+        }
+    } while (menu != 6);
+
+    return 0;
+}
